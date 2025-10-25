@@ -62,7 +62,10 @@
               "buildTarget": "odic-angular-test:build:development"
             }
           },
-          "defaultConfiguration": "development"
+          "defaultConfiguration": "development",
+          "options": {
+            "allowedHosts": ["localhost"],
+          }
         },
         "extract-i18n": {
           "builder": "@angular/build:extract-i18n"

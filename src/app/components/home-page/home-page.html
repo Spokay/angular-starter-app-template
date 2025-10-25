@@ -1,0 +1,9 @@
+<p>home works!</p>
+
+@if (isAuthenticated && user) {
+  <div class="container">
+    <h1>Welcome, {{ user.name }}!</h1>
+    <p>You are logged in as {{ user.email }}.</p>
+    <button (click)="logout()" class="btn btn-secondary">Logout</button>
+  </div>
+}
