@@ -1,18 +1,42 @@
 # See https://docs.github.com/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
 
-# Compiled output
+# Build outputs
 /dist
+/build
 /tmp
+/temp
 /out-tsc
 /bazel-out
 
-# Node
+# Node & package manager
 /node_modules
-npm-debug.log
-yarn-error.log
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+# Diagnostic reports (Node.js)
+report.*.json
+# Caches & stores
+/.angular/cache
+.pnpm-store/
+.npm/
+.yarn/
+.cache/
+.parcel-cache/
+
+# Environment files (keep example files tracked)
+.env
+.env.*
+!.env.example
+!.env.*.example
 
 # IDEs and editors
 .idea/
+*.iml
 .project
 .classpath
 .c9/
@@ -28,13 +52,15 @@ yarn-error.log
 !.vscode/extensions.json
 .history/*
 
+# Testing & coverage
+/coverage
+/.nyc_output
+
 # Miscellaneous
-/.angular/cache
 .sass-cache/
 /connect.lock
-/coverage
 /libpeerconnection.log
-testem.log
+/testem.log
 /typings
 __screenshots__/
 
