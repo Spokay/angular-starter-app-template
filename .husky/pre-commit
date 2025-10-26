@@ -1,0 +1,5 @@
+# Lint TypeScript and Angular templates
+npx eslint . --ext .ts,.html
+
+# Prettier check (do not write on CI)
+npx prettier --check .
