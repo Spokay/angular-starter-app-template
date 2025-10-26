@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "odic-angular-test": {
+    "angular-starter-app-template": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -14,9 +14,7 @@
           "builder": "@angular/build:application",
           "options": {
             "browser": "src/main.ts",
-            "polyfills": [
-              "zone.js"
-            ],
+            "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
             "assets": [
               {
@@ -24,9 +22,7 @@
                 "input": "public"
               }
             ],
-            "styles": [
-              "src/styles.css"
-            ]
+            "styles": ["src/styles.css"]
           },
           "configurations": {
             "production": {
@@ -56,15 +52,15 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "odic-angular-test:build:production"
+              "buildTarget": "test-odic-second:build:production"
             },
             "development": {
-              "buildTarget": "odic-angular-test:build:development"
+              "buildTarget": "test-odic-second:build:development"
             }
           },
           "defaultConfiguration": "development",
           "options": {
-            "allowedHosts": ["localhost"],
+            "allowedHosts": ["localhost"]
           }
         },
         "extract-i18n": {
@@ -73,10 +69,7 @@
         "test": {
           "builder": "@angular/build:karma",
           "options": {
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ],
+            "polyfills": ["zone.js", "zone.js/testing"],
             "tsConfig": "tsconfig.spec.json",
             "assets": [
               {
@@ -84,9 +77,7 @@
                 "input": "public"
               }
             ],
-            "styles": [
-              "src/styles.css"
-            ]
+            "styles": ["src/styles.css"]
           }
         }
       }
