@@ -1,9 +1,9 @@
-import {Routes} from '@angular/router';
-import {HomePage} from './components/home-page/home-page';
+import { Routes } from '@angular/router';
+import { AutoLoginPartialRoutesGuard } from 'angular-auth-oidc-client';
+
+import { Home } from './home/home';
 
 export const routes: Routes = [
-  {
-    'path': '',
-    'component': HomePage
-  },
+  { path: '', redirectTo: 'home', pathMatch: 'full' },
+  { path: 'home', component: Home, canActivate: [AutoLoginPartialRoutesGuard] },
 ];
