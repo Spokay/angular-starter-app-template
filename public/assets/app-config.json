@@ -1,0 +1,14 @@
+{
+  "oidc": {
+    "authority": "https://idp.example.com/realms/__REALM__",
+    "clientId": "__CLIENT_ID__",
+    "redirectUrl": "http://localhost:4200",
+    "postLogoutRedirectUri": "http://localhost:4200",
+    "scope": "openid profile email",
+    "responseType": "code",
+    "secureRoutes": ["http://localhost:3000", "https://api.example.com"]
+  },
+  "api": {
+    "baseUrl": "http://localhost:3000"
+  }
+}

@@ -1,30 +1,31 @@
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import {
   ApplicationConfig,
   inject,
   provideAppInitializer,
   provideBrowserGlobalErrorListeners,
-  provideZoneChangeDetection
+  provideZoneChangeDetection,
 } from '@angular/core';
-import {provideRouter} from '@angular/router';
+import { provideRouter } from '@angular/router';
+import { AppConfigService } from '@core/app-config.service';
+import { provideAuth } from 'angular-auth-oidc-client';
 
-import {routes} from './app.routes';
-import {provideHttpClient, withFetch} from '@angular/common/http';
-import {provideOAuthClient} from 'angular-oauth2-oidc';
-import {AuthService} from './auth/auth.service';
+import { routes } from './app.routes';
+import { authConfig } from './auth/auth.config';
 
-const intializeAuth = () => {
-  const authStateService = inject(AuthService);
-  console.log("Initializing authentication state");
-  return authStateService.initAuth();
+const initializeApp = () => {
+  const appConfigService = inject(AppConfigService);
+  console.log('Initializing application');
+  return appConfigService.load();
 };
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
+    provideAppInitializer(initializeApp),
+    provideHttpClient(withInterceptorsFromDi()),
     provideRouter(routes),
-    provideHttpClient(withFetch()),
-    provideOAuthClient(),
-    provideAppInitializer(intializeAuth)
-  ]
+    provideAuth(authConfig),
+  ],
 };
