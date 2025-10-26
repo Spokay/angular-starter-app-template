@@ -1,0 +1,18 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: __NODE_VERSION__
+          cache: __PKG_MGR__
+      - run: __PKG_MGR_RUN__ install
+      - run: __PKG_MGR_RUN__ lint
+      - run: __PKG_MGR_RUN__ build
