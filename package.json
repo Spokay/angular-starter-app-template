@@ -1,14 +1,20 @@
 {
-  "name": "odic-angular-test",
+  "name": "angular-starter-app-template",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "typecheck": "tsc -p tsconfig.app.json --noEmit",
+    "lint": "eslint . --ext .ts,.html",
+    "format": "prettier --write .",
+    "prepare": "husky"
   },
   "prettier": {
+    "printWidth": 100,
+    "singleQuote": true,
     "overrides": [
       {
         "files": "*.html",
@@ -20,13 +26,13 @@
   },
   "private": true,
   "dependencies": {
-    "angular-oauth2-oidc": "^20.0.2",
     "@angular/common": "^20.3.0",
     "@angular/compiler": "^20.3.0",
     "@angular/core": "^20.3.0",
     "@angular/forms": "^20.3.0",
     "@angular/platform-browser": "^20.3.0",
     "@angular/router": "^20.3.0",
+    "angular-auth-oidc-client": "20.0.2",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
@@ -42,6 +48,15 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
-    "typescript": "~5.9.2"
+    "typescript": "~5.9.2",
+    "eslint": "^9.38.0",
+    "prettier": "^3.3.3",
+    "@typescript-eslint/parser": "^8.12.2",
+    "@typescript-eslint/eslint-plugin": "^8.12.2",
+    "@angular-eslint/eslint-plugin": "^19.3.0",
+    "@angular-eslint/eslint-plugin-template": "^19.3.0",
+    "@angular-eslint/template-parser": "^19.3.0",
+    "eslint-plugin-import": "^2.31.0",
+    "husky": "^9.1.6"
   }
 }
