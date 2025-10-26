@@ -1,0 +1,21 @@
+stages: [install, lint, build]
+image: node:__NODE_VERSION__
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - node_modules/
+install:
+  stage: install
+  script:
+    - __PKG_MGR_RUN__ install
+lint:
+  stage: lint
+  script:
+    - __PKG_MGR_RUN__ lint
+build:
+  stage: build
+  script:
+    - __PKG_MGR_RUN__ build
+  artifacts:
+    paths:
+      - dist/
