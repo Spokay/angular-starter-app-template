@@ -25,6 +25,7 @@ export const authConfig: PassedInitialConfig = {
           : appConfig.value.resourceServer?.baseUrl
             ? [appConfig.value.resourceServer.baseUrl]
             : [],
+        ...(appConfig.value.oidc.audience && { audience: appConfig.value.oidc.audience }),
       } as const;
 
       return new StsConfigStaticLoader(cfg);

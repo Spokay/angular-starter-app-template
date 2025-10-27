@@ -25,7 +25,7 @@ An Angular starter template with OIDC authentication, runtime configuration, and
 
 **Excluded on purpose:**
 
-- E2E and unit tests (omitted by design; add later if needed)
+- Unit tests (omitted by design; add later if needed)
 - Dev mock server and Dockerized IdP
 
 ## Requirements
@@ -83,6 +83,23 @@ At startup, the app loads `public/assets/app-config.json`. Modify or replace thi
 }
 ```
 
+**Optional: Resource Server Audience**
+
+If your IdP (Keycloak, Auth0, etc.) requires an `audience` claim for your resource server, add it to the `oidc` configuration:
+
+```json
+{
+  "oidc": {
+    "authority": "https://idp.example.com/realms/my-realm",
+    "clientId": "my-spa-client",
+    "audience": "api://my-spring-api",
+    ...
+  }
+}
+```
+
+This ensures the access token is only valid for your specific backend API (e.g., Spring Boot resource server).
+
 ### How It Works
 
 1. **`AppConfigService`** (provided at root) fetches `app-config.json` in an `APP_INITIALIZER`
@@ -104,6 +121,7 @@ export interface AppConfig {
     scope?: string;
     responseType?: 'code' | string;
     secureRoutes?: string[];
+    audience?: string;
   };
   resourceServer: { baseUrl: string };
 }

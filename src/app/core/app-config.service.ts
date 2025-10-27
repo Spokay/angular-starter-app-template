@@ -9,6 +9,7 @@ export interface AppConfig {
     scope?: string;
     responseType?: string;
     secureRoutes?: string[];
+    audience?: string;
   };
   resourceServer: { baseUrl: string };
 }
