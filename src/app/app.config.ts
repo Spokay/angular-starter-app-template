@@ -1,23 +1,16 @@
 import {
-  APP_INITIALIZER,
-  ApplicationConfig, inject, provideAppInitializer,
+  ApplicationConfig,
+  inject,
+  provideAppInitializer,
   provideBrowserGlobalErrorListeners,
-  providePlatformInitializer,
   provideZoneChangeDetection
 } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import {provideRouter} from '@angular/router';
 
-import { routes } from './app.routes';
-import {
-  HTTP_INTERCEPTORS,
-  HttpClient,
-  provideHttpClient,
-  withFetch,
-  withInterceptorsFromDi
-} from '@angular/common/http';
-import {AuthConfig, provideOAuthClient} from 'angular-oauth2-oidc';
+import {routes} from './app.routes';
+import {provideHttpClient, withFetch} from '@angular/common/http';
+import {provideOAuthClient} from 'angular-oauth2-oidc';
 import {AuthService} from './auth/auth.service';
-import {authCodeFlowConfig} from './auth/auth-config';
 
 const intializeAuth = () => {
   const authStateService = inject(AuthService);
