@@ -22,8 +22,8 @@ export const authConfig: PassedInitialConfig = {
         renewTimeBeforeTokenExpiresInSeconds: 30,
         secureRoutes: appConfig.value.oidc.secureRoutes?.length
           ? appConfig.value.oidc.secureRoutes
-          : appConfig.value.api?.baseUrl
-            ? [appConfig.value.api.baseUrl]
+          : appConfig.value.resourceServer?.baseUrl
+            ? [appConfig.value.resourceServer.baseUrl]
             : [],
       } as const;
 

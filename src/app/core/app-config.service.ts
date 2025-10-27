@@ -10,7 +10,7 @@ export interface AppConfig {
     responseType?: string;
     secureRoutes?: string[];
   };
-  api: { baseUrl: string };
+  resourceServer: { baseUrl: string };
 }
 
 @Injectable({ providedIn: 'root' })

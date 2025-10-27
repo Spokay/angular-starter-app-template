@@ -6,9 +6,9 @@
     "postLogoutRedirectUri": "http://localhost:4200",
     "scope": "openid profile email",
     "responseType": "code",
-    "secureRoutes": ["http://localhost:3000", "https://api.example.com"]
+    "secureRoutes": ["http://localhost:8080", "https://api.example.com"]
   },
-  "api": {
-    "baseUrl": "http://localhost:3000"
+  "resourceServer": {
+    "baseUrl": "http://localhost:8080"
   }
 }
