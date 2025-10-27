@@ -1,4 +1,4 @@
-# \***\*APP_DISPLAY_NAME\*\***
+# **__APP_DISPLAY_NAME__**
 
 An Angular starter template with OIDC authentication, runtime configuration, and strict linting/formatting. Features opinionated OIDC auth, conventional commits, and CI/CD templates for GitHub or GitLab.
 
