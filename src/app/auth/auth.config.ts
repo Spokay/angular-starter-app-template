@@ -20,6 +20,8 @@ export const authConfig: PassedInitialConfig = {
         silentRenew: true,
         useRefreshToken: true,
         renewTimeBeforeTokenExpiresInSeconds: 30,
+        autoUserInfo: true,
+        triggerAuthorizationResultEvent: true,
         secureRoutes: appConfig.value.oidc.secureRoutes?.length
           ? appConfig.value.oidc.secureRoutes
           : appConfig.value.resourceServer?.baseUrl
