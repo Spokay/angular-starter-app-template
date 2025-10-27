@@ -48,4 +48,3 @@ export const authCodeFlowConfig: AuthConfig = {
   oidc: true,
   clearHashAfterLogin: true,
 };
-

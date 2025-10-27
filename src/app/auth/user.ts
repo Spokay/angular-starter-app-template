@@ -11,4 +11,3 @@ export interface AuthState {
   isInitialized: boolean;
   error: string | null;
 }
-

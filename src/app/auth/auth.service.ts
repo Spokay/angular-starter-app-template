@@ -1,18 +1,19 @@
-import {Injectable, signal, WritableSignal, computed} from '@angular/core';
-import {OAuthService, OAuthSuccessEvent} from 'angular-oauth2-oidc';
-import {filter, tap} from 'rxjs';
-import {UserContext, AuthState} from './user';
-import {authCodeFlowConfig, clientAuthConfig} from './auth-config';
+import { Injectable, signal, WritableSignal, computed } from '@angular/core';
+import { OAuthService, OAuthSuccessEvent } from 'angular-oauth2-oidc';
+import { filter, tap } from 'rxjs';
+
+import { authCodeFlowConfig, clientAuthConfig } from './auth-config';
+import { UserContext, AuthState } from './user';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   private authState: WritableSignal<AuthState> = signal<AuthState>({
     user: null,
     isLoading: false,
     isInitialized: false,
-    error: null
+    error: null,
   });
 
   // Public computed properties
@@ -51,7 +52,7 @@ export class AuthService {
       this.updateAuthState({
         isLoading: false,
         isInitialized: true,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     } finally {
@@ -143,7 +144,9 @@ export class AuthService {
     switch (event.type) {
       case 'token_received':
       case 'token_refreshed':
-        this.loadUserProfile().catch(error => console.error('Error loading profile after token event:', error));
+        this.loadUserProfile().catch((error) =>
+          console.error('Error loading profile after token event:', error),
+        );
         break;
       case 'user_profile_loaded':
         if (event.info && Object.keys(event.info).length > 0) {
@@ -190,7 +193,7 @@ export class AuthService {
   private startTokenValidation(): void {
     this.tokenCheckInterval = window.setInterval(
       () => this.validateToken(),
-      clientAuthConfig.tokenValidationIntervalMs
+      clientAuthConfig.tokenValidationIntervalMs,
     );
   }
 
@@ -205,7 +208,7 @@ export class AuthService {
       console.warn('No refresh token available during validation, clearing session...');
       this.updateAuthState({
         user: null,
-        error: 'Session expired - please log in again'
+        error: 'Session expired - please log in again',
       });
       this.clearCrossTabUserContext();
       return;
@@ -218,7 +221,7 @@ export class AuthService {
       console.error('Token refresh failed during validation:', error);
       this.updateAuthState({
         user: null,
-        error: 'Session expired - please log in again'
+        error: 'Session expired - please log in again',
       });
       this.clearCrossTabUserContext();
     }
@@ -232,7 +235,7 @@ export class AuthService {
   }
 
   private updateAuthState(updates: Partial<AuthState>): void {
-    this.authState.update(current => ({ ...current, ...updates }));
+    this.authState.update((current) => ({ ...current, ...updates }));
   }
 
   private syncUserContextCrossTabs(userContext: UserContext | null): void {
@@ -256,15 +259,19 @@ export class AuthService {
       id: identityClaims['sub'],
       name: identityClaims['name'],
       email: identityClaims['email'],
-      roles: identityClaims['roles'] || []
+      roles: identityClaims['roles'] || [],
     };
   }
 
   private setupTokenEventHandlers() {
     this.oauthService.events
       .pipe(
-        tap((e: any) => clientAuthConfig.enableDebugLogging && console.log('OAuth Event:', e.type, e)),
-        filter((e: any) => ['token_received', 'token_refreshed', 'user_profile_loaded'].includes(e.type))
+        tap(
+          (e: any) => clientAuthConfig.enableDebugLogging && console.log('OAuth Event:', e.type, e),
+        ),
+        filter((e: any) =>
+          ['token_received', 'token_refreshed', 'user_profile_loaded'].includes(e.type),
+        ),
       )
       .subscribe((event: any) => {
         console.log(`Processing OAuth event: ${event.type}`);
@@ -274,7 +281,11 @@ export class AuthService {
 
   private setupSessionEventHandlers() {
     this.oauthService.events
-      .pipe(filter((e: any) => ['session_error', 'session_terminated', 'token_expires'].includes(e.type)))
+      .pipe(
+        filter((e: any) =>
+          ['session_error', 'session_terminated', 'token_expires'].includes(e.type),
+        ),
+      )
       .subscribe((event: any) => {
         console.warn(`OAuth session event: ${event.type}`, event);
         this.handleSessionEvent(event);
