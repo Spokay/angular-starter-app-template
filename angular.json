@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "angular-starter-app-template": {
+    "__APP_NAME__": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -52,10 +52,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "test-odic-second:build:production"
+              "buildTarget": "__APP_NAME__:build:production"
             },
             "development": {
-              "buildTarget": "test-odic-second:build:development"
+              "buildTarget": "__APP_NAME__:build:development"
             }
           },
           "defaultConfiguration": "development",
