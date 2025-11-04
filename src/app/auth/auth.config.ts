@@ -5,7 +5,7 @@ import {
   StsConfigStaticLoader,
 } from 'angular-auth-oidc-client';
 
-// Build the auth configuration from runtime values using the library's loader mechanism
+// Auth configuration loaded at runtime
 export const authConfig: PassedInitialConfig = {
   loader: {
     provide: StsConfigLoader,

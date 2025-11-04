@@ -15,8 +15,15 @@ import { authConfig } from './auth/auth.config';
 
 const initializeApp = () => {
   const appConfigService = inject(AppConfigService);
+
   console.log('Initializing application');
-  return appConfigService.load();
+
+  return (async () => {
+    await appConfigService.load();
+    console.log('Config loaded');
+
+    await appConfigService.initializeAuth();
+  })();
 };
 
 export const appConfig: ApplicationConfig = {
