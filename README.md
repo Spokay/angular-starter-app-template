@@ -39,17 +39,22 @@ An Angular starter template with OIDC authentication, runtime configuration, and
 This is a template repository. To use it:
 
 1. **Use as template** on GitHub, or clone this repository
-2. **Replace all token placeholders** in the codebase:
+2. **Choose proxy setup** (for local development CORS handling):
+   - **With proxy**: Set `__PROXY_CONFIG__` to `,\n            "proxyConfig": "src/proxy.conf.json"`, use `/api` for `__SECURE_ROUTES__`
+   - **Without proxy**: Set `__PROXY_CONFIG__` to empty string, use full backend URL for `__SECURE_ROUTES__`
+3. **Replace all token placeholders** in the codebase:
    - `__APP_NAME__` - npm package name (lowercase-with-hyphens)
    - `__APP_DISPLAY_NAME__` - User-friendly display name
-   - `__OIDC_AUTHORITY__` - Your OIDC authority URL
+   - `__OIDC_AUTHORITY__` - Your OIDC authority URL (e.g., "https://idp.example.com/realms/myrealm")
    - `__CLIENT_ID__` - Your OIDC client ID
-   - `__REALM__` - Your OIDC realm (if applicable)
+   - `__REDIRECT_URL__` - OAuth redirect URL (e.g., "http://localhost:4200")
+   - `__POST_LOGOUT_REDIRECT_URL__` - Post-logout redirect URL
+   - `__BACKEND_URL__` - Backend API base URL (e.g., "http://localhost:8080")
+   - `__SECURE_ROUTES__` - Routes requiring auth tokens (e.g., "/api")
    - `__NODE_VERSION__` - Node.js version (e.g., "20")
    - `__PKG_MGR__` - Package manager ("npm", "pnpm", or "yarn")
    - `__PKG_MGR_RUN__` - Run command ("npm run", "pnpm", or "yarn")
-   - `__CLI_PACKAGE__` - CLI package name (if you have one)
-3. **Update `public/assets/app-config.json`** with your OIDC and API configuration
+   - `__PROXY_CONFIG__` - Proxy configuration (see step 2)
 4. **Remove unused CI file**: Delete either `.github/` or `.gitlab-ci.yml` depending on your VCS provider
 5. **Install dependencies**:
    ```bash

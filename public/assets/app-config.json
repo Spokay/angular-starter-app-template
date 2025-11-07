@@ -1,14 +1,14 @@
 {
   "oidc": {
-    "authority": "https://idp.example.com/realms/__REALM__",
+    "authority": "__OIDC_AUTHORITY__",
     "clientId": "__CLIENT_ID__",
-    "redirectUrl": "http://localhost:4200",
-    "postLogoutRedirectUri": "http://localhost:4200",
+    "redirectUrl": "__REDIRECT_URL__",
+    "postLogoutRedirectUri": "__POST_LOGOUT_REDIRECT_URL__",
     "scope": "openid profile email",
     "responseType": "code",
-    "secureRoutes": ["http://localhost:8080", "https://api.example.com"]
+    "secureRoutes": ["__SECURE_ROUTES__"]
   },
   "resourceServer": {
-    "baseUrl": "http://localhost:8080"
+    "baseUrl": "__BACKEND_URL__"
   }
 }

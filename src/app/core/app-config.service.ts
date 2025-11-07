@@ -2,6 +2,8 @@ import { Injectable, Injector } from '@angular/core';
 import { OidcSecurityService } from 'angular-auth-oidc-client';
 import { firstValueFrom } from 'rxjs';
 
+import { environment } from '../../environments/environment';
+
 export interface AppConfig {
   oidc: {
     authority: string;
@@ -27,9 +29,10 @@ export class AppConfigService {
   }
 
   async load(): Promise<void> {
-    const res = await fetch('assets/app-config.json', { cache: 'no-store' });
+    const configPath = environment.configPath;
+    const res = await fetch(configPath, { cache: 'no-store' });
     if (!res.ok) {
-      throw new Error(`Failed to load app-config.json: ${res.status} ${res.statusText}`);
+      throw new Error(`Failed to load config from ${configPath}: ${res.status} ${res.statusText}`);
     }
     this.config = await res.json();
   }

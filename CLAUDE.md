@@ -134,6 +134,22 @@ ADRs are stored in `docs/adrs/`. Key decisions:
 
 When making significant architectural changes, create new ADRs following the MADR template.
 
+## Development Proxy Setup
+
+The template supports optional proxy configuration for local development to avoid CORS issues.
+
+### With Proxy (recommended for local development)
+- `__PROXY_CONFIG__` → `,\n            "proxyConfig": "src/proxy.conf.json"`
+- `__BACKEND_URL__` → `"http://localhost:8080"` (actual backend server)
+- `__SECURE_ROUTES__` → `"/api"` (relative path that gets proxied)
+- Requests to `/api/*` are forwarded to the backend server
+
+### Without Proxy (for production-like setup)
+- `__PROXY_CONFIG__` → `` (empty string, removes proxy config)
+- `__BACKEND_URL__` → `"https://api.example.com"` (full backend URL)
+- `__SECURE_ROUTES__` → `"https://api.example.com"` (same as backend URL)
+- App calls backend directly (backend must handle CORS)
+
 ## Token Placeholders
 
 When using this template with the CLI, the following tokens will be replaced:
@@ -146,9 +162,29 @@ When using this template with the CLI, the following tokens will be replaced:
   - Used in: `src/index.html` (line 5), `src/app/app.spec.ts` (line 21), `README.md` (line 1)
   - Format: Any valid display name (spaces, capitalization, etc. allowed)
   - Usage: For human-readable contexts like documentation, page titles, and test descriptions
-- `__OIDC_AUTHORITY__` - OIDC authority URL (in app-config.json)
-- `__CLIENT_ID__` - OIDC client ID (in app-config.json)
-- `__REALM__` - OIDC realm name (in app-config.json)
+- `__OIDC_AUTHORITY__` - OIDC authority URL
+  - Used in: `public/assets/app-config.json`
+  - Format: Full OIDC authority URL (e.g., "https://idp.example.com/realms/myrealm")
+- `__CLIENT_ID__` - OIDC client ID
+  - Used in: `public/assets/app-config.json`
+- `__REDIRECT_URL__` - OAuth redirect URL after login
+  - Used in: `public/assets/app-config.json`
+  - Format: Full URL where users are redirected after login (e.g., "http://localhost:4200" for dev, "https://myapp.com" for prod)
+- `__POST_LOGOUT_REDIRECT_URL__` - OAuth redirect URL after logout
+  - Used in: `public/assets/app-config.json`
+  - Format: Full URL where users are redirected after logout
+- `__BACKEND_URL__` - Backend API base URL
+  - Used in: `public/assets/app-config.json`, `src/proxy.conf.json`
+  - Format: Backend server URL (e.g., "http://localhost:8080" for dev, "https://api.myapp.com" for prod)
+- `__SECURE_ROUTES__` - Routes that require authentication tokens
+  - Used in: `public/assets/app-config.json`
+  - Format: URL pattern or relative path (e.g., "/api" for proxy setup, "https://api.myapp.com" for direct calls)
+- `__PROXY_CONFIG__` - Development proxy configuration (conditional)
+  - Used in: `angular.json`
+  - Format:
+    - If proxy enabled: `,\n            "proxyConfig": "src/proxy.conf.json"`
+    - If proxy disabled: `` (empty string)
+  - Note: When proxy is disabled, `__SECURE_ROUTES__` should match `__BACKEND_URL__` (full URL)
 - `__NODE_VERSION__` - Node.js version (in CI files)
 - `__PKG_MGR__` - Package manager (npm/pnpm/yarn) (in CI files)
 - `__PKG_MGR_RUN__` - Package manager run command (in CI files)

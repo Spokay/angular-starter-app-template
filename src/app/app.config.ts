@@ -1,4 +1,4 @@
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import {
   ApplicationConfig,
   inject,
@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { AppConfigService } from '@core/app-config.service';
-import { provideAuth } from 'angular-auth-oidc-client';
+import { provideAuth, authInterceptor } from 'angular-auth-oidc-client';
 
 import { routes } from './app.routes';
 import { authConfig } from './auth/auth.config';
@@ -31,7 +31,7 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideAppInitializer(initializeApp),
-    provideHttpClient(withInterceptorsFromDi()),
+    provideHttpClient(withInterceptors([authInterceptor()])),
     provideRouter(routes),
     provideAuth(authConfig),
   ],
