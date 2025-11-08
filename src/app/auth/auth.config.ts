@@ -15,13 +15,16 @@ export const authConfig: PassedInitialConfig = {
         redirectUrl: appConfig.value.oidc.redirectUrl ?? window.location.origin,
         postLogoutRedirectUri: appConfig.value.oidc.postLogoutRedirectUri ?? window.location.origin,
         clientId: appConfig.value.oidc.clientId,
-        scope: appConfig.value.oidc.scope ?? 'openid profile email',
+        scope: appConfig.value.oidc.scope ?? 'openid profile email roles',
         responseType: (appConfig.value.oidc.responseType as string) ?? 'code',
         silentRenew: true,
         useRefreshToken: true,
         renewTimeBeforeTokenExpiresInSeconds: 30,
         autoUserInfo: true,
         triggerAuthorizationResultEvent: true,
+        postLoginRoute: 'home',
+        unauthorizedRoute: 'unauthorized',
+        forbiddenRoute: 'forbidden',
         secureRoutes: appConfig.value.oidc.secureRoutes?.length
           ? appConfig.value.oidc.secureRoutes
           : appConfig.value.resourceServer?.baseUrl

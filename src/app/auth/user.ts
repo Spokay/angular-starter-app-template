@@ -4,10 +4,3 @@ export interface UserContext {
   email: string;
   roles: string[];
 }
-
-export interface AuthState {
-  user: UserContext | null;
-  isLoading: boolean;
-  isInitialized: boolean;
-  error: string | null;
-}

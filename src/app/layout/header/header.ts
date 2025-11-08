@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { OidcSecurityService } from 'angular-auth-oidc-client';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-header',
@@ -11,7 +12,9 @@ import { OidcSecurityService } from 'angular-auth-oidc-client';
 export class Header {
   private readonly oidcSecurityService = inject(OidcSecurityService);
 
-  isAuthenticated$ = this.oidcSecurityService.isAuthenticated$;
+  isAuthenticated$ = this.oidcSecurityService.isAuthenticated$.pipe(
+    map(({ isAuthenticated }) => isAuthenticated),
+  );
   userData$ = this.oidcSecurityService.userData$;
 
   login(): void {

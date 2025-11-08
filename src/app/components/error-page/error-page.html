@@ -1,0 +1,13 @@
+<div class="error-container">
+  <div class="error-content">
+    <h1 class="error-title">{{ errorDetails.title }}</h1>
+    <p class="error-message">{{ errorDetails.message }}</p>
+    @if (errorDetails.description) {
+      <p class="error-description">{{ errorDetails.description }}</p>
+    }
+    <div class="error-actions">
+      <a routerLink="/" class="btn-primary">Go to Home</a>
+      <button type="button" class="btn-secondary" (click)="goBack()">Go Back</button>
+    </div>
+  </div>
+</div>

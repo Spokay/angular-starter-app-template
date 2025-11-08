@@ -4,7 +4,7 @@
     "clientId": "__CLIENT_ID__",
     "redirectUrl": "__REDIRECT_URL__",
     "postLogoutRedirectUri": "__POST_LOGOUT_REDIRECT_URL__",
-    "scope": "openid profile email",
+    "scope": "openid profile email roles",
     "responseType": "code",
     "secureRoutes": ["__SECURE_ROUTES__"]
   },
