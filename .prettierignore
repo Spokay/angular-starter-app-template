@@ -1,0 +1,18 @@
+# angular.json carries the __PROXY_CONFIG__ placeholder, which makes it invalid JSON until
+# the CLI replaces it. Prettier cannot parse the file in template form, so `prettier --check`
+# (and therefore the pre-commit hook) fails on a clean checkout without this.
+angular.json
+
+.angular/
+dist/
+node_modules/
+package-lock.json
+
+# agent tooling, not shipped app source
+.claude/
+
+# Markdown is excluded because `__TOKEN__` is *also* markdown emphasis syntax: prettier
+# rewrites a bare `# **__APP_DISPLAY_NAME__**` heading into `# \***\*APP_DISPLAY_NAME\*\***`,
+# destroying the placeholder so the CLI can never replace it. Tokens inside code spans are
+# safe, but nothing enforces that, so the whole file type is left alone.
+*.md

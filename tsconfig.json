@@ -20,7 +20,7 @@
       "@shared/*": ["src/app/shared/*"],
       "@layout/*": ["src/app/layout/*"],
       "@components/*": ["src/app/components/*"],
-      "@auth/*": ["src/app/auth/*"],
+      "@auth/*": ["src/app/auth/*"]
     }
   },
   "angularCompilerOptions": {

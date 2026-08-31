@@ -14,7 +14,6 @@ import { provideAuth, authInterceptor } from 'angular-auth-oidc-client';
 import { routes } from './app.routes';
 import { authConfig } from './auth/auth.config';
 
-
 const initializeApp = () => {
   const appConfigService = inject(AppConfigService);
 

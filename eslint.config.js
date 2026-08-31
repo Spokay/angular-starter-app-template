@@ -14,7 +14,7 @@ const templateFlatRecommended =
   angularTemplate && angularTemplate.configs ? angularTemplate.configs['flat/recommended'] : null;
 
 const configs = [
-  // Ignore caches, build outputs, vendor, public assets, and test specs (not used)
+  // Ignore caches, build outputs, vendor and public assets
   {
     ignores: [
       '.angular/**',
@@ -22,7 +22,8 @@ const configs = [
       'node_modules/**',
       'public/**',
       'src/index.html',
-      '**/*.spec.ts',
+      // agent tooling: standalone Node scripts, not app source under these browser rules
+      '.claude/**',
     ],
   },
 
