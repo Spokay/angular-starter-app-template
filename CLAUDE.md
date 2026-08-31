@@ -13,7 +13,10 @@ This is an Angular starter template with OIDC authentication, runtime configurat
 - `npm start` – Start dev server (default: http://localhost:4200)
 - `npm run build` – Production build to `dist/`
 - `npm run watch` – Build with watch mode for development
-- `npm test` – Run Karma/Jasmine tests (note: tests are omitted by design in this template)
+- `npm test` – Run Karma/Jasmine tests (watch mode); `npm run test:ci` for a single headless run
+  - Component specs share `src/testing/test-providers.ts`, which supplies `provideHttpClient()`,
+    `provideRouter([])` and a static `provideAuth()` config — without them the OIDC service fails
+    to inject with `NG0201: No provider found for _HttpClient`.
 
 ### Code Quality
 
@@ -111,7 +114,7 @@ Tests are **intentionally omitted** in this starter template. The template inclu
 
 - Place unit tests next to source files with `.spec.ts` extension
 - ESLint ignores `**/*.spec.ts` files
-- Use `npm test` to run Karma
+- Use `npm test` to run Karma (or `npm run test:ci` in CI)
 
 ## CI/CD
 
@@ -139,12 +142,14 @@ When making significant architectural changes, create new ADRs following the MAD
 The template supports optional proxy configuration for local development to avoid CORS issues.
 
 ### With Proxy (recommended for local development)
+
 - `__PROXY_CONFIG__` → `,\n            "proxyConfig": "src/proxy.conf.json"`
 - `__BACKEND_URL__` → `"http://localhost:8080"` (actual backend server)
 - `__SECURE_ROUTES__` → `"/api"` (relative path that gets proxied)
 - Requests to `/api/*` are forwarded to the backend server
 
 ### Without Proxy (for production-like setup)
+
 - `__PROXY_CONFIG__` → `` (empty string, removes proxy config)
 - `__BACKEND_URL__` → `"https://api.example.com"` (full backend URL)
 - `__SECURE_ROUTES__` → `"https://api.example.com"` (same as backend URL)
