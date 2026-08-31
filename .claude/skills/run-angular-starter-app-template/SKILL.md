@@ -1,6 +1,6 @@
 ---
 name: run-angular-starter-app-template
-description: Build, run, and drive the angular-starter-app-template Angular 20 app. Use when asked to start the dev server, take a screenshot of the UI, log in through OIDC end to end, verify a UI or auth change in the real browser, or run its build / lint / typecheck / karma tests.
+description: Build, run, and drive the angular-starter-app-template Angular 22 app. Use when asked to start the dev server, take a screenshot of the UI, log in through OIDC end to end, verify a UI or auth change in the real browser, or run its build / lint / typecheck / karma tests.
 ---
 
 This repo is a **template, not a runnable app**: `angular.json` contains
@@ -26,9 +26,15 @@ All paths below are relative to `angular-starter-app-template/`.
 Nothing to `apt-get`. Verified in this container:
 
 ```bash
-node -v                    # v22.22.0  -- needs >=22 for the global WebSocket the driver uses
+node -v                    # v24.20.0
 google-chrome --version    # Google Chrome 147.0.7727.116
 ```
+
+**Node 22.22.3 or 24.15 minimum.** Angular 22's engines are
+`^22.22.3 || ^24.15.0 || >=26`; on anything older `npm install` succeeds and `ng build`
+then refuses. The driver additionally needs Node >=22 for the global `WebSocket` it drives
+Chrome with. If node resolves to an older build, source the login shell
+(`nvm use 24`) or prefix `PATH` with the 24.x bin directory.
 
 No `xvfb` needed — Chrome runs `--headless=new`.
 
@@ -158,6 +164,16 @@ automatically; `CHROME_BIN` is not needed.
 - **`pkill -f "driver.mjs serve"` kills the calling shell**, because the Bash tool's own
   `bash -c` command line contains that string (exit code 144, no output). Kill by PID from
   `ss -ltnp | grep 4200` instead.
+- **The `@angular-eslint/*` plugin packages export no `configs`.** Only `rules`. The flat
+  configs live in the `angular-eslint` meta-package, so a config that reads
+  `plugin.configs['flat/recommended']` gets `undefined` and silently lints nothing
+  Angular-specific — `npm run lint` still passes, which is the trap.
+- **Components rely on OnPush.** Angular 22's `ng update` inserts
+  `changeDetection: ChangeDetectionStrategy.Eager` everywhere to preserve v21 behaviour;
+  those shims were removed after verifying the app renders correctly without them. Bind
+  state through the `async` pipe — writing to a field from a manual `.subscribe()` does not
+  mark an OnPush component dirty, so the view updates only when some other binding happens
+  to trigger a check.
 - **Auth state lives in `sessionStorage`**, so every fresh Chrome profile starts logged
   out — which is what makes the smoke run repeatable.
 

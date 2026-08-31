@@ -1,20 +1,18 @@
-// ESLint v9 flat config for Angular + TypeScript + Templates
-// CommonJS format compatible with Node ESM/CJS projects.
-
+// ESLint v9 flat config for Angular + TypeScript + templates, CommonJS so it loads in both
+// module systems.
+//
+// The shared Angular configs live in the `angular-eslint` meta-package. The individual
+// @angular-eslint/* plugins export only `rules`, so reaching for `plugin.configs[...]`
+// yields undefined and silently disables every Angular rule.
 const js = require('@eslint/js');
-const angular = require('@angular-eslint/eslint-plugin');
-const angularTemplate = require('@angular-eslint/eslint-plugin-template');
+const angular = require('angular-eslint');
 const importPlugin = require('eslint-plugin-import');
-const tsParser = require('@typescript-eslint/parser');
 const globals = require('globals');
+const tseslint = require('typescript-eslint');
 
-const angularFlatRecommended =
-  angular && angular.configs ? angular.configs['flat/recommended'] : null;
-const templateFlatRecommended =
-  angularTemplate && angularTemplate.configs ? angularTemplate.configs['flat/recommended'] : null;
-
-const configs = [
-  // Ignore caches, build outputs, vendor and public assets
+module.exports = tseslint.config(
+  // Caches, build outputs, vendor, public assets, and agent tooling (standalone Node
+  // scripts that fail wholesale under the browser globals below).
   {
     ignores: [
       '.angular/**',
@@ -22,68 +20,41 @@ const configs = [
       'node_modules/**',
       'public/**',
       'src/index.html',
-      // agent tooling: standalone Node scripts, not app source under these browser rules
       '.claude/**',
     ],
   },
 
-  // Base JS recommendations (apply to JS files only)
+  // Plain JS: config files and hooks, which run in Node.
   {
-    ...js.configs.recommended,
-    files: ['**/*.js', '**/*.cjs', '**/*.mjs'],
+    files: ['**/*.js', '**/*.cjs', '**/*.mjs', '.husky/**'],
+    extends: [js.configs.recommended],
+    languageOptions: { globals: globals.node },
   },
 
-  // Node globals for config and scripts
   {
-    files: ['eslint.config.js', '.husky/**'],
-    languageOptions: {
-      globals: globals.node,
-    },
-    rules: {
-      'no-undef': 'off',
-    },
-  },
-];
-
-if (angularFlatRecommended) configs.push(angularFlatRecommended);
-if (templateFlatRecommended) configs.push(templateFlatRecommended);
-
-// TypeScript rules (non type-aware to keep fast and simple)
-configs.push({
-  files: ['**/*.ts'],
-  languageOptions: {
-    parser: tsParser,
-    parserOptions: {
-      ecmaVersion: 'latest',
-      sourceType: 'module',
-    },
-    globals: globals.browser,
-  },
-  plugins: {
-    import: importPlugin,
-  },
-  rules: {
-    // TS uses type system; avoid core no-undef on TS files
-    'no-undef': 'off',
-    // Keep previous customizations
-    'import/no-unresolved': 'off',
-    'import/order': [
-      'warn',
-      {
-        alphabetize: { order: 'asc', caseInsensitive: true },
-        'newlines-between': 'always',
-      },
+    files: ['**/*.ts'],
+    extends: [
+      js.configs.recommended,
+      ...tseslint.configs.recommended,
+      ...angular.configs.tsRecommended,
     ],
+    processor: angular.processInlineTemplates,
+    languageOptions: { globals: globals.browser },
+    plugins: { import: importPlugin },
+    rules: {
+      'import/no-unresolved': 'off', // TypeScript resolves the @core/@layout/... aliases
+      'import/order': [
+        'warn',
+        {
+          alphabetize: { order: 'asc', caseInsensitive: true },
+          'newlines-between': 'always',
+        },
+      ],
+    },
   },
-});
 
-// Angular template rules only for component templates
-configs.push({
-  files: ['src/app/**/*.html'],
-  languageOptions: {
-    // Ensure Angular template parser is used for HTML files
-    parser: require('@angular-eslint/template-parser'),
+  {
+    files: ['**/*.html'],
+    extends: [...angular.configs.templateRecommended, ...angular.configs.templateAccessibility],
   },
-});
-
-module.exports = configs;
+);
