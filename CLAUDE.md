@@ -46,7 +46,7 @@ The app uses a **runtime configuration** approach where the same build can be de
 
 ### Authentication Flow
 
-- Uses `angular-auth-oidc-client` library (version 20.0.2)
+- Uses `angular-auth-oidc-client` library (version 22.0.0)
 - `AutoLoginPartialRoutesGuard` protects routes (see `app.routes.ts`)
 - The library's built-in interceptor automatically attaches `Authorization: Bearer <token>` to URLs matching `secureRoutes` in the config
 - `provideHttpClient(withInterceptorsFromDi())` is required in `app.config.ts` for the interceptor to work
@@ -55,10 +55,17 @@ The app uses a **runtime configuration** approach where the same build can be de
 
 TypeScript is configured with path aliases in `tsconfig.json`:
 
-- `@core/*` → `src/app/core/*`
-- `@shared/*` → `src/app/shared/*`
+- `@core/*` → `./src/app/core/*`
+- `@shared/*` → `./src/app/shared/*`
+- `@layout/*` → `./src/app/layout/*`
+- `@components/*` → `./src/app/components/*`
+- `@auth/*` → `./src/app/auth/*`
 
-Always use these aliases for imports from core and shared modules.
+Always use these aliases for imports across module boundaries.
+
+The targets are relative and there is no `baseUrl`: TypeScript 6 deprecates `baseUrl`
+(TS5101) and removes it in 7, and without it non-relative `paths` targets are rejected
+(TS5090).
 
 ### Directory Structure
 
@@ -89,7 +96,10 @@ public/assets/
 - Uses ESLint v9 flat config format (`eslint.config.js`)
 - Configured for Angular + TypeScript + templates
 - Import ordering: alphabetical, case-insensitive, with newlines between groups
-- Ignores: `.angular/**`, `dist/**`, `**/*.spec.ts`, `public/**`
+- Ignores: `.angular/**`, `dist/**`, `public/**`, `.claude/**`
+- Angular rules come from the `angular-eslint` meta-package. The individual
+  `@angular-eslint/*` packages export only `rules`, so reading `plugin.configs[...]`
+  returns undefined and silently disables every Angular rule.
 
 ### Prettier
 
@@ -110,10 +120,12 @@ This project enforces Conventional Commits via commitlint (configuration expecte
 
 ## Testing Strategy
 
-Tests are **intentionally omitted** in this starter template. The template includes Karma/Jasmine dependencies for future use, but no test files are provided by design. When adding tests:
+Five component specs ship with the template and must stay green. When adding tests:
 
 - Place unit tests next to source files with `.spec.ts` extension
-- ESLint ignores `**/*.spec.ts` files
+- Spread `provideTestingEnvironment()` from `src/testing/test-providers.ts` into the
+  `providers` of any spec that instantiates a component; they all reach `OidcSecurityService`
+- Specs are linted like the rest of the source
 - Use `npm test` to run Karma (or `npm run test:ci` in CI)
 
 ## CI/CD
