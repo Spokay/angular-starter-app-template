@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { provideTestingEnvironment } from '../../../testing/test-providers';
+
 import { ErrorPage } from './error-page';
 
 describe('ErrorPage', () => {
@@ -9,6 +11,7 @@ describe('ErrorPage', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ErrorPage],
+      providers: [provideTestingEnvironment()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ErrorPage);
