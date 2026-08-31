@@ -1,4 +1,4 @@
-import { Injectable, Injector } from '@angular/core';
+import { Injectable, Injector, inject } from '@angular/core';
 import { OidcSecurityService } from 'angular-auth-oidc-client';
 import { firstValueFrom } from 'rxjs';
 
@@ -20,9 +20,9 @@ export interface AppConfig {
 
 @Injectable({ providedIn: 'root' })
 export class AppConfigService {
-  private config!: AppConfig;
+  private injector = inject(Injector);
 
-  constructor(private injector: Injector) {}
+  private config!: AppConfig;
 
   get value(): AppConfig {
     return this.config;

@@ -1,6 +1,6 @@
 <div>Welcome to home Route</div>
 
-@if (isAuthenticated) {
+@if (isAuthenticated$ | async) {
   <div>
     <button (click)="logout()">Logout</button>
     <button (click)="logoffAndRevokeTokens()">Logout and revoke tokens</button>
@@ -11,7 +11,7 @@
 
     <br />
 
-    Is Authenticated: {{ isAuthenticated }}
+    Is Authenticated: {{ isAuthenticated$ | async }}
 
     <br />
     userData
