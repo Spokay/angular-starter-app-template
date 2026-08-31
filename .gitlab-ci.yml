@@ -1,17 +1,27 @@
-stages: [install, lint, build]
+stages: [lint, test, build]
 image: node:__NODE_VERSION__
 cache:
   key: ${CI_COMMIT_REF_SLUG}
   paths:
     - node_modules/
-install:
-  stage: install
-  script:
-    - __PKG_MGR_RUN__ install
+default:
+  before_script:
+    - __PKG_MGR__ install
 lint:
   stage: lint
   script:
     - __PKG_MGR_RUN__ lint
+    - __PKG_MGR_RUN__ typecheck
+test:
+  stage: test
+  image: node:__NODE_VERSION__
+  variables:
+    CHROME_BIN: /usr/bin/chromium
+  before_script:
+    - apt-get update && apt-get install -y chromium
+    - __PKG_MGR__ install
+  script:
+    - __PKG_MGR_RUN__ test:ci
 build:
   stage: build
   script:

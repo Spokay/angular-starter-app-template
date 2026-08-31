@@ -13,6 +13,8 @@ jobs:
         with:
           node-version: __NODE_VERSION__
           cache: __PKG_MGR__
-      - run: __PKG_MGR_RUN__ install
+      - run: __PKG_MGR__ install
       - run: __PKG_MGR_RUN__ lint
+      - run: __PKG_MGR_RUN__ typecheck
+      - run: __PKG_MGR_RUN__ test:ci
       - run: __PKG_MGR_RUN__ build
