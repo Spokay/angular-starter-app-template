@@ -1,5 +1,5 @@
 import { Location } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
 interface ErrorDetails {
@@ -53,13 +53,11 @@ const ERROR_MAP: Record<number, ErrorDetails> = {
   styleUrl: './error-page.css',
 })
 export class ErrorPage implements OnInit {
+  private readonly route = inject(ActivatedRoute);
+  private readonly location = inject(Location);
+
   statusCode: number = 500;
   errorDetails: ErrorDetails = this.getErrorDetails(500);
-
-  constructor(
-    private readonly route: ActivatedRoute,
-    private readonly location: Location,
-  ) {}
 
   ngOnInit(): void {
     this.route.data.subscribe((data) => {

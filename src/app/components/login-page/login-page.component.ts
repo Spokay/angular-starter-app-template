@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { OidcSecurityService } from 'angular-auth-oidc-client';
 
@@ -9,10 +9,8 @@ import { OidcSecurityService } from 'angular-auth-oidc-client';
   styleUrl: './login-page.component.css',
 })
 export class LoginPage implements OnInit {
-  constructor(
-    private readonly _oidcSecurityService: OidcSecurityService,
-    private readonly _router: Router,
-  ) {}
+  private readonly _oidcSecurityService = inject(OidcSecurityService);
+  private readonly _router = inject(Router);
 
   ngOnInit(): void {
     // If already authenticated, redirect to home
