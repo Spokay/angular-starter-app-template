@@ -1,5 +1,7 @@
 import { AsyncPipe, JsonPipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Component, inject, signal } from '@angular/core';
+import { MusicService } from '@core/music.service';
 import { OidcSecurityService } from 'angular-auth-oidc-client';
 import { map } from 'rxjs/operators';
 
@@ -10,6 +12,12 @@ import { map } from 'rxjs/operators';
 })
 export class Home {
   private readonly oidcSecurityService = inject(OidcSecurityService);
+  private readonly musicService = inject(MusicService);
+
+  // Signals rather than a subscribe-into-a-field: they mark the view dirty on their own, so
+  // this keeps working if the component ever moves to OnPush.
+  readonly musics = signal<string[] | null>(null);
+  readonly musicsError = signal<string | null>(null);
 
   configuration$ = this.oidcSecurityService.getConfiguration();
 
@@ -21,6 +29,19 @@ export class Home {
   isAuthenticated$ = this.oidcSecurityService.isAuthenticated$.pipe(
     map(({ isAuthenticated }) => isAuthenticated),
   );
+
+  /**
+   * The one call that proves the whole setup: the OIDC interceptor attaches the access token
+   * because the resource server's base URL is listed in `secureRoutes`.
+   */
+  loadMusics(): void {
+    this.musicsError.set(null);
+    this.musicService.list().subscribe({
+      next: (musics) => this.musics.set(musics),
+      error: (error: HttpErrorResponse) =>
+        this.musicsError.set(`${error.status} ${error.statusText}`),
+    });
+  }
 
   login(): void {
     this.oidcSecurityService.authorize();

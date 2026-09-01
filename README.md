@@ -40,8 +40,8 @@ This is a template repository. To use it:
 
 1. **Use as template** on GitHub, or clone this repository
 2. **Choose proxy setup** (for local development CORS handling):
-   - **With proxy**: Set `__PROXY_CONFIG__` to `,\n            "proxyConfig": "src/proxy.conf.json"`, use `/api` for `__SECURE_ROUTES__`
-   - **Without proxy**: Set `__PROXY_CONFIG__` to empty string, use full backend URL for `__SECURE_ROUTES__`
+   - **With proxy**: Set `__PROXY_CONFIG__` to `,\n            "proxyConfig": "src/proxy.conf.json"`, use `/api` for `__API_BASE_URL__` / `__SECURE_ROUTES__`
+   - **Without proxy**: Set `__PROXY_CONFIG__` to empty string, use the backend URL **including its context path** for `__API_BASE_URL__` / `__SECURE_ROUTES__`
 3. **Replace all token placeholders** in the codebase:
    - `__APP_NAME__` - npm package name (lowercase-with-hyphens)
    - `__APP_DISPLAY_NAME__` - User-friendly display name
@@ -50,7 +50,8 @@ This is a template repository. To use it:
    - `__REDIRECT_URL__` - OAuth redirect URL (e.g., "http://localhost:4200")
    - `__POST_LOGOUT_REDIRECT_URL__` - Post-logout redirect URL
    - `__BACKEND_URL__` - Backend API base URL (e.g., "http://localhost:8080")
-   - `__SECURE_ROUTES__` - Routes requiring auth tokens (e.g., "/api")
+   - `__API_BASE_URL__` - Where the app calls the API (e.g., "/api")
+   - `__SECURE_ROUTES__` - Routes requiring auth tokens; the same value
    - `__NODE_VERSION__` - Node.js version (e.g., "20")
    - `__PKG_MGR__` - Package manager ("npm", "pnpm", or "yarn")
    - `__PKG_MGR_RUN__` - Run command ("npm run", "pnpm", or "yarn")
@@ -80,13 +81,18 @@ At startup, the app loads `public/assets/app-config.json`. Modify or replace thi
     "postLogoutRedirectUri": "http://localhost:4200",
     "scope": "openid profile email",
     "responseType": "code",
-    "secureRoutes": ["http://localhost:8080", "https://api.example.com"]
+    "secureRoutes": ["http://localhost:8080/api"]
   },
   "resourceServer": {
-    "baseUrl": "http://localhost:8080"
+    "baseUrl": "http://localhost:8080/api"
   }
 }
 ```
+
+`resourceServer.baseUrl` is **where the app calls the API**, not the server's origin: `/api`
+when the dev proxy is on, and the server's URL including its context path when it is off.
+Services read it (see `BaseService` below) and `secureRoutes` covers it, which is what makes
+the OIDC interceptor attach the access token to those calls.
 
 **Optional: Resource Server Audience**
 
@@ -111,6 +117,29 @@ This ensures the access token is only valid for your specific backend API (e.g.,
 2. **`auth.config.ts`** builds the `AuthModuleConfig` using values from `AppConfigService`
 3. **`provideAuth(authConfig)`** is registered in `app.config.ts`
 
+### Calling your API
+
+`BaseService` (`src/app/core/base.service.ts`) holds the HTTP plumbing and **no URL of its
+own** — each service declares its own `baseUrl`, so a service for this app's resource server
+and one for a third-party API are the same kind of object. Its `get`/`post`/`put`/`patch`/
+`delete` are `protected`, so a service exposes its own domain API rather than a raw HTTP
+surface.
+
+```ts
+@Injectable({ providedIn: 'root' })
+export class MusicService extends BaseService {
+  protected readonly baseUrl = inject(AppConfigService).value.resourceServer.baseUrl;
+
+  list(): Observable<string[]> {
+    return this.get<string[]>('musics');
+  }
+}
+```
+
+`src/app/core/music.service.ts` is that example, wired to a button on the home page. Because
+`baseUrl` comes from the runtime config and is covered by `secureRoutes`, the library's
+interceptor attaches `Authorization: Bearer <token>` with nothing further to configure.
+
 **Service excerpt:**
 
 ```ts
@@ -128,6 +157,8 @@ export interface AppConfig {
     secureRoutes?: string[];
     audience?: string;
   };
+  // Where the app calls the API -- `/api` behind the dev proxy, origin + context path
+  // without it.
   resourceServer: { baseUrl: string };
 }
 

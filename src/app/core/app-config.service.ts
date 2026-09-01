@@ -15,7 +15,14 @@ export interface AppConfig {
     secureRoutes?: string[];
     audience?: string;
   };
-  resourceServer: { baseUrl: string };
+  resourceServer: {
+    /**
+     * Where the app calls the API — not the server's origin. `/api` behind the dev proxy,
+     * and the server's URL including its context path without it. Services read this; it is
+     * also what `secureRoutes` covers, which is how the access token gets attached.
+     */
+    baseUrl: string;
+  };
 }
 
 @Injectable({ providedIn: 'root' })
