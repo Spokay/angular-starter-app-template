@@ -59,7 +59,10 @@ const TOKENS = (useProxy = true) => ({
   __CLIENT_ID__: CLIENT_ID,
   __REDIRECT_URL__: APP_URL,
   __POST_LOGOUT_REDIRECT_URL__: APP_URL,
+  // The proxy target has to stay the server's origin; the app itself calls the API root.
+  // The stub API answers any path, so there is no context path to append here.
   __BACKEND_URL__: `http://localhost:${API_PORT}`,
+  __API_BASE_URL__: useProxy ? '/api' : `http://localhost:${API_PORT}`,
   __SECURE_ROUTES__: useProxy ? '/api' : `http://localhost:${API_PORT}`,
   __PROXY_CONFIG__: useProxy ? ',\n            "proxyConfig": "src/proxy.conf.json"' : '',
   __REALM__: REALM,
@@ -448,24 +451,25 @@ async function smoke() {
     check(tokenStored === true, 'access token persisted in sessionStorage');
     await cdp.shot('02-home-authenticated');
 
-    // The dev-server proxy must reach the stub resource server. Retried in-page: vite
-    // occasionally refuses the first upstream connection, and a rejected fetch would
-    // otherwise throw out of cdp.eval and abort the whole run instead of failing one check.
-    const proxied = await cdp.eval(`(async () => {
-      for (let attempt = 0; attempt < 5; attempt++) {
-        try {
-          const res = await fetch('/api/musics');
-          return res.status;
-        } catch (e) {
-          await new Promise((r) => setTimeout(r, 500));
-        }
-      }
-      return 'fetch kept failing after 5 attempts';
-    })()`);
-    check(proxied === 200, 'dev-server proxy forwards /api to the resource server', `status ${proxied}`);
+    // Through the app, not around it: the button calls MusicService, which goes through
+    // HttpClient and therefore through the OIDC interceptor. A hand-built fetch here would
+    // prove the proxy works and nothing about the token ever being attached.
+    await cdp.eval(`document.querySelector('[data-testid="load-musics"]').click()`);
+    await cdp.waitFor(`document.querySelector('[data-testid="musics"] li')`, {
+      timeout: 15_000,
+      label: 'musics rendered from the resource server',
+    });
+    const rendered = await cdp.eval(
+      `[...document.querySelectorAll('[data-testid="musics"] li')].map((li) => li.textContent.trim()).join(',')`,
+    );
+    check(rendered === 'Music 1,Music 2,Music 3', "the app renders the resource server's data", rendered);
+
+    const musicsRequest = api.seen.find((r) => r.url.includes('/musics'));
+    check(!!musicsRequest, 'stub resource server saw the request', musicsRequest?.url);
     check(
-      api.seen.some((r) => r.url.startsWith('/api/musics')),
-      'stub resource server saw the proxied request',
+      musicsRequest?.auth?.startsWith('Bearer ') === true,
+      'the OIDC interceptor attached the access token',
+      musicsRequest?.auth ? `${musicsRequest.auth.slice(0, 14)}...` : 'no Authorization header',
     );
 
     const realErrors = consoleErrors.filter((e) => !/favicon/i.test(e));

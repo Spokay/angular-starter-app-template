@@ -14,6 +14,21 @@
     Is Authenticated: {{ isAuthenticated$ | async }}
 
     <br />
+
+    <h3>Resource server</h3>
+    <button (click)="loadMusics()" data-testid="load-musics">Load musics</button>
+    @if (musics(); as musics) {
+      <ul data-testid="musics">
+        @for (music of musics; track music) {
+          <li>{{ music }}</li>
+        }
+      </ul>
+    }
+    @if (musicsError(); as error) {
+      <p data-testid="musics-error">Could not reach the resource server: {{ error }}</p>
+    }
+
+    <br />
     userData
     <pre>{{ userData$ | async | json }}</pre>
 

@@ -33,6 +33,22 @@ This is an Angular starter template with OIDC authentication, runtime configurat
 
 ## Architecture
 
+### Calling the API
+
+`src/app/core/base.service.ts` holds the HTTP plumbing every API service shares and
+**deliberately knows no URL**: it declares `protected abstract readonly baseUrl`, and each
+implementation decides its own. That is what lets a service for the scaffolded resource
+server and one for some third-party API be the same kind of object.
+
+Its `get`/`post`/`put`/`patch`/`delete` are `protected` on purpose — a service exposes its
+own domain API (`list()`, `save(track)`), not a raw HTTP surface for callers to assemble
+paths against. `url()` joins a path onto the base tolerating a slash on either side.
+
+`src/app/core/music.service.ts` is the worked example: `baseUrl` from
+`AppConfigService.value.resourceServer.baseUrl`, wired to a button on the home page. Because
+that base URL is covered by `secureRoutes`, the OIDC interceptor attaches the token with
+nothing further to configure.
+
 ### Runtime Configuration Pattern
 
 The app uses a **runtime configuration** approach where the same build can be deployed to multiple environments by swapping `public/assets/app-config.json`. This is critical to understand:
@@ -49,7 +65,7 @@ The app uses a **runtime configuration** approach where the same build can be de
 - Uses `angular-auth-oidc-client` library (version 22.0.0)
 - `AutoLoginPartialRoutesGuard` protects routes (see `app.routes.ts`)
 - The library's built-in interceptor automatically attaches `Authorization: Bearer <token>` to URLs matching `secureRoutes` in the config
-- `provideHttpClient(withInterceptorsFromDi())` is required in `app.config.ts` for the interceptor to work
+- It is registered functionally: `provideHttpClient(withInterceptors([authInterceptor(), errorHandlingInterceptor]))` in `app.config.ts`. Dropping `authInterceptor()` from that array silently stops every API call carrying a token — `driver.mjs smoke` asserts the header for exactly that reason.
 
 ### Path Aliases
 
@@ -77,7 +93,9 @@ src/app/
 ├── auth/
 │   └── auth.config.ts        # OIDC configuration factory
 ├── core/
-│   └── app-config.service.ts # Runtime config loader
+│   ├── app-config.service.ts # Runtime config loader
+│   ├── base.service.ts       # HTTP plumbing; implementations supply the base URL
+│   └── music.service.ts      # Worked example of calling the resource server
 └── components/
     └── home/                 # Example protected component
         ├── home.ts
@@ -120,11 +138,16 @@ This project enforces Conventional Commits via commitlint (configuration expecte
 
 ## Testing Strategy
 
-Five component specs ship with the template and must stay green. When adding tests:
+Six spec files ship with the template and must stay green. When adding tests:
 
 - Place unit tests next to source files with `.spec.ts` extension
 - Spread `provideTestingEnvironment()` from `src/testing/test-providers.ts` into the
-  `providers` of any spec that instantiates a component; they all reach `OidcSecurityService`
+  `providers` of any spec that instantiates a component; they all reach `OidcSecurityService`.
+  It also stubs `AppConfigService`, whose `value` is undefined in tests because the app
+  initializer never runs — without the stub, any component reaching a service that reads the
+  config fails on a property of undefined rather than on its own logic
+- A spec that asserts on requests adds `provideHttpClientTesting()` **after** it, so the
+  testing backend replaces the real one (see `src/app/core/music.service.spec.ts`)
 - Specs are linted like the rest of the source
 - Use `npm test` to run Karma (or `npm run test:ci` in CI)
 
@@ -157,14 +180,14 @@ The template supports optional proxy configuration for local development to avoi
 
 - `__PROXY_CONFIG__` → `,\n            "proxyConfig": "src/proxy.conf.json"`
 - `__BACKEND_URL__` → `"http://localhost:8080"` (actual backend server)
-- `__SECURE_ROUTES__` → `"/api"` (relative path that gets proxied)
+- `__API_BASE_URL__` / `__SECURE_ROUTES__` → `"/api"` (relative path that gets proxied)
 - Requests to `/api/*` are forwarded to the backend server
 
 ### Without Proxy (for production-like setup)
 
 - `__PROXY_CONFIG__` → `` (empty string, removes proxy config)
 - `__BACKEND_URL__` → `"https://api.example.com"` (full backend URL)
-- `__SECURE_ROUTES__` → `"https://api.example.com"` (same as backend URL)
+- `__API_BASE_URL__` / `__SECURE_ROUTES__` → `"https://api.example.com/api"` (backend URL plus context path)
 - App calls backend directly (backend must handle CORS)
 
 ## Token Placeholders
@@ -190,12 +213,18 @@ When using this template with the CLI, the following tokens will be replaced:
 - `__POST_LOGOUT_REDIRECT_URL__` - OAuth redirect URL after logout
   - Used in: `public/assets/app-config.json`
   - Format: Full URL where users are redirected after logout
-- `__BACKEND_URL__` - Backend API base URL
-  - Used in: `public/assets/app-config.json`, `src/proxy.conf.json`
+- `__BACKEND_URL__` - The resource server's **origin**
+  - Used in: `src/proxy.conf.json` only — a proxy target has to be an origin
   - Format: Backend server URL (e.g., "http://localhost:8080" for dev, "https://api.myapp.com" for prod)
+- `__API_BASE_URL__` - Where the app **calls** the API
+  - Used in: `public/assets/app-config.json` (`resourceServer.baseUrl`)
+  - Format: `/api` when the dev proxy is on; the backend URL **including its context path**
+    when it is off. Omitting the context path sends every call one level above the
+    controllers.
 - `__SECURE_ROUTES__` - Routes that require authentication tokens
   - Used in: `public/assets/app-config.json`
-  - Format: URL pattern or relative path (e.g., "/api" for proxy setup, "https://api.myapp.com" for direct calls)
+  - Format: the same value as `__API_BASE_URL__` — the token is attached to exactly what the
+    app calls
 - `__PROXY_CONFIG__` - Development proxy configuration (conditional)
   - Used in: `angular.json`
   - Format:

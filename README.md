@@ -80,13 +80,18 @@ At startup, the app loads `public/assets/app-config.json`. Modify or replace thi
     "postLogoutRedirectUri": "http://localhost:4200",
     "scope": "openid profile email",
     "responseType": "code",
-    "secureRoutes": ["http://localhost:8080", "https://api.example.com"]
+    "secureRoutes": ["http://localhost:8080/api"]
   },
   "resourceServer": {
-    "baseUrl": "http://localhost:8080"
+    "baseUrl": "http://localhost:8080/api"
   }
 }
 ```
+
+`resourceServer.baseUrl` is **where the app calls the API**, not the server's origin: `/api`
+when the dev proxy is on, and the server's URL including its context path when it is off.
+Services read it (see `BaseService` below) and `secureRoutes` covers it, which is what makes
+the OIDC interceptor attach the access token to those calls.
 
 **Optional: Resource Server Audience**
 
@@ -111,6 +116,29 @@ This ensures the access token is only valid for your specific backend API (e.g.,
 2. **`auth.config.ts`** builds the `AuthModuleConfig` using values from `AppConfigService`
 3. **`provideAuth(authConfig)`** is registered in `app.config.ts`
 
+### Calling your API
+
+`BaseService` (`src/app/core/base.service.ts`) holds the HTTP plumbing and **no URL of its
+own** — each service declares its own `baseUrl`, so a service for this app's resource server
+and one for a third-party API are the same kind of object. Its `get`/`post`/`put`/`patch`/
+`delete` are `protected`, so a service exposes its own domain API rather than a raw HTTP
+surface.
+
+```ts
+@Injectable({ providedIn: 'root' })
+export class MusicService extends BaseService {
+  protected readonly baseUrl = inject(AppConfigService).value.resourceServer.baseUrl;
+
+  list(): Observable<string[]> {
+    return this.get<string[]>('musics');
+  }
+}
+```
+
+`src/app/core/music.service.ts` is that example, wired to a button on the home page. Because
+`baseUrl` comes from the runtime config and is covered by `secureRoutes`, the library's
+interceptor attaches `Authorization: Bearer <token>` with nothing further to configure.
+
 **Service excerpt:**
 
 ```ts
@@ -128,6 +156,8 @@ export interface AppConfig {
     secureRoutes?: string[];
     audience?: string;
   };
+  // Where the app calls the API -- `/api` behind the dev proxy, origin + context path
+  // without it.
   resourceServer: { baseUrl: string };
 }
 

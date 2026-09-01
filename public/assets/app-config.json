@@ -9,6 +9,6 @@
     "secureRoutes": ["__SECURE_ROUTES__"]
   },
   "resourceServer": {
-    "baseUrl": "__BACKEND_URL__"
+    "baseUrl": "__API_BASE_URL__"
   }
 }
