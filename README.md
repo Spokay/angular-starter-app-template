@@ -40,8 +40,8 @@ This is a template repository. To use it:
 
 1. **Use as template** on GitHub, or clone this repository
 2. **Choose proxy setup** (for local development CORS handling):
-   - **With proxy**: Set `__PROXY_CONFIG__` to `,\n            "proxyConfig": "src/proxy.conf.json"`, use `/api` for `__SECURE_ROUTES__`
-   - **Without proxy**: Set `__PROXY_CONFIG__` to empty string, use full backend URL for `__SECURE_ROUTES__`
+   - **With proxy**: Set `__PROXY_CONFIG__` to `,\n            "proxyConfig": "src/proxy.conf.json"`, use `/api` for `__API_BASE_URL__` / `__SECURE_ROUTES__`
+   - **Without proxy**: Set `__PROXY_CONFIG__` to empty string, use the backend URL **including its context path** for `__API_BASE_URL__` / `__SECURE_ROUTES__`
 3. **Replace all token placeholders** in the codebase:
    - `__APP_NAME__` - npm package name (lowercase-with-hyphens)
    - `__APP_DISPLAY_NAME__` - User-friendly display name
@@ -50,7 +50,8 @@ This is a template repository. To use it:
    - `__REDIRECT_URL__` - OAuth redirect URL (e.g., "http://localhost:4200")
    - `__POST_LOGOUT_REDIRECT_URL__` - Post-logout redirect URL
    - `__BACKEND_URL__` - Backend API base URL (e.g., "http://localhost:8080")
-   - `__SECURE_ROUTES__` - Routes requiring auth tokens (e.g., "/api")
+   - `__API_BASE_URL__` - Where the app calls the API (e.g., "/api")
+   - `__SECURE_ROUTES__` - Routes requiring auth tokens; the same value
    - `__NODE_VERSION__` - Node.js version (e.g., "20")
    - `__PKG_MGR__` - Package manager ("npm", "pnpm", or "yarn")
    - `__PKG_MGR_RUN__` - Run command ("npm run", "pnpm", or "yarn")

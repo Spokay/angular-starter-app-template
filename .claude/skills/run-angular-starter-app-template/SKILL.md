@@ -68,14 +68,15 @@ ready
 ✓ header shows the logged-in user
 ✓ access token persisted in sessionStorage
    screenshot -> /tmp/run-angular-starter-app-template/shots/02-home-authenticated.png
-✓ dev-server proxy forwards /api to the resource server  status 200
-✓ stub resource server saw the proxied request
+✓ the app renders the resource server's data  Music 1,Music 2,Music 3
+✓ stub resource server saw the request  /api/musics
+✓ the OIDC interceptor attached the access token  Bearer eyJhbGc...
 ✓ no console errors during the login flow
    screenshot -> /tmp/run-angular-starter-app-template/shots/03-unknown-route.png
 ✓ unknown route renders the 404 error page
 ✓ the 404 page renders its message, not a blank <main>
 
-12/12 checks passed
+13/13 checks passed
 ```
 
 Screenshots land in `/tmp/run-angular-starter-app-template/shots/`; `ng serve` output in
