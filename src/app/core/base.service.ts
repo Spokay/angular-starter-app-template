@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 /** The subset of `HttpClient`'s options a service normally needs. */
 export interface RequestOptions {
   headers?: HttpHeaders | Record<string, string | string[]>;
-  params?: HttpParams | Record<string, string | number | boolean>;
+  params?: HttpParams | Record<string, string | number | boolean | ReadonlyArray<string | number | boolean>>;
   context?: HttpContext;
 }
 
