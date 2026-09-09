@@ -67,6 +67,34 @@ The app uses a **runtime configuration** approach where the same build can be de
 - The library's built-in interceptor automatically attaches `Authorization: Bearer <token>` to URLs matching `secureRoutes` in the config
 - It is registered functionally: `provideHttpClient(withInterceptors([authInterceptor(), errorHandlingInterceptor]))` in `app.config.ts`. Dropping `authInterceptor()` from that array silently stops every API call carrying a token — `driver.mjs smoke` asserts the header for exactly that reason.
 
+### Error Handling and Logging
+
+**`LoggerService`** (`src/app/shared/logger.service.ts`) is the only place this app writes to
+the console — `no-console` in `eslint.config.js` enforces it, and the two exceptions carry an
+inline disable saying why: the logger itself, and `src/main.ts`, whose bootstrap catch runs
+before an injector exists.
+
+Its level comes from `logging.level` in `app-config.json`, so a deployed build can be made
+verbose without rebuilding. Two details are load-bearing: the level is read on **every call**,
+because the logger is used from the app initializer before `AppConfigService.load()` has
+resolved; and `AppConfigService` is reached through the `Injector` rather than injected,
+because `AppConfigService` is what the logger reads from, and an eager dependency both ways is
+a DI cycle. For the same reason `AppConfigService.initializeAuth()` *returns* whether the
+session was restored instead of logging it — `app.config.ts` does that.
+
+**`GlobalErrorHandler`** (`src/app/core/global-error-handler.ts`) is registered as Angular's
+`ErrorHandler` in `app.config.ts`, so uncaught component, template, effect and subscription
+errors reach the logger. Keep `provideBrowserGlobalErrorListeners()` beside it: that is what
+forwards `window.onerror` and unhandled promise rejections into the same handler. It is the
+place to add reporting when the project has somewhere to send failures.
+
+**`errorHandlingInterceptor`** (`src/app/core/error-handling.interceptor.ts`) tags every
+request with `X-Request-Id` — the header the scaffolded resource server reads into its logging
+MDC and returns as `traceId` in every error body, which is what makes a console line and a
+server log line the same request. It logs 5xx and network-`0` at error, other 4xx at warn, and
+navigates **only** on 401 and 403. A 404 is logged and left alone: a failed data call must not
+throw the user off the page they are on.
+
 ### Path Aliases
 
 TypeScript is configured with path aliases in `tsconfig.json`:
@@ -87,24 +115,30 @@ The targets are relative and there is no `baseUrl`: TypeScript 6 deprecates `bas
 
 ```
 src/app/
-├── app.ts                    # Root component
-├── app.config.ts             # Application providers & initialization
-├── app.routes.ts             # Route definitions
+├── app.ts                          # Root component
+├── app.config.ts                   # Application providers & initialization
+├── app.routes.ts                   # Route definitions
 ├── auth/
-│   └── auth.config.ts        # OIDC configuration factory
+│   ├── auth.config.ts              # OIDC configuration factory
+│   └── user.ts                     # UserContext shape
 ├── core/
-│   ├── app-config.service.ts # Runtime config loader
-│   ├── base.service.ts       # HTTP plumbing; implementations supply the base URL
-│   └── music.service.ts      # Worked example of calling the resource server
+│   ├── app-config.service.ts       # Runtime config loader
+│   ├── base.service.ts             # HTTP plumbing; implementations supply the base URL
+│   ├── error-handling.interceptor.ts  # Request id, failure logging, 401/403 routing
+│   ├── global-error-handler.ts     # Angular ErrorHandler -> LoggerService
+│   └── music.service.ts            # Worked example of calling the resource server
+├── shared/
+│   └── logger.service.ts           # The app's only console writer; level from app-config
+├── layout/
+│   ├── header/
+│   └── footer/
 └── components/
-    └── home/                 # Example protected component
-        ├── home.ts
-        ├── home.html
-        ├── home.css
-        └── home.spec.ts
+    ├── home/                       # Example protected component
+    ├── login-page/
+    └── error-page/                 # 401/403/404 and the ** route
 
 public/assets/
-└── app-config.json           # Runtime environment configuration
+└── app-config.json                 # Runtime environment configuration
 ```
 
 ## Code Style & Linting
@@ -138,9 +172,11 @@ This project enforces Conventional Commits via commitlint (configuration expecte
 
 ## Testing Strategy
 
-Six spec files ship with the template and must stay green. When adding tests:
+Eight spec files ship with the template and must stay green. When adding tests:
 
 - Place unit tests next to source files with `.spec.ts` extension
+- `provideTestingEnvironment()` stubs `AppConfigService` with the same shape a generated
+  `app-config.json` has, `logging` block included; extend that stub when you add a config key
 - Spread `provideTestingEnvironment()` from `src/testing/test-providers.ts` into the
   `providers` of any spec that instantiates a component; they all reach `OidcSecurityService`.
   It also stubs `AppConfigService`, whose `value` is undefined in tests because the app
@@ -163,14 +199,12 @@ Remember to replace token placeholders (`__NODE_VERSION__`, `__PKG_MGR__`, `__PK
 
 ## Architecture Decision Records
 
-ADRs are stored in `docs/adrs/`. Key decisions:
-
-- **ADR-001**: OIDC with `angular-auth-oidc-client` and `AutoLoginPartialRoutesGuard`
-- **ADR-002**: Runtime configuration via `app-config.json`
-- **ADR-003**: Linting/Formatting/Conventional Commits policy
-- **ADR-004**: CI provider selection
-
-When making significant architectural changes, create new ADRs following the MADR template.
+There is no `docs/adrs/` directory: the decisions that shape this template — OIDC through
+`angular-auth-oidc-client` with `AutoLoginPartialRoutesGuard`, runtime configuration via
+`app-config.json`, the linting and Conventional Commits policy, shipping both CI providers, and
+the error/logging setup above — are documented in this file instead, beside the code they
+constrain. A generated project that wants ADRs should start `docs/adrs/` with the MADR template
+and record its own decisions there.
 
 ## Development Proxy Setup
 
@@ -235,6 +269,18 @@ When using this template with the CLI, the following tokens will be replaced:
 - `__PKG_MGR__` - Package manager (npm/pnpm/yarn) (in CI files)
 - `__PKG_MGR_RUN__` - Package manager run command (in CI files)
 
+### Adding a key to `app-config.json`
+
+Three places, or generated projects silently lose it:
+
+1. the `AppConfig` interface in `src/app/core/app-config.service.ts`
+2. `public/assets/app-config.json` here
+3. `generateAppConfig` in `spokay-app-starter-cli/src/config/app-config-generator.ts` — it
+   rewrites the file wholesale as a post-step rather than replacing tokens in it
+
+The CLI run skill's `driver.mjs matrix` asserts the generated file field for field, so a
+forgotten third step fails there rather than in a scaffolded project weeks later.
+
 ## Common Pitfalls
 
 1. **Don't hardcode OIDC/API URLs**: Always use `AppConfigService.value` to access runtime config
@@ -243,3 +289,5 @@ When using this template with the CLI, the following tokens will be replaced:
 4. **Token replacement**: When using this template, remember to replace all `__TOKEN__` placeholders with actual values
 5. **Asset location**: Static assets go in `public/` directory (Angular 20+ convention), not `src/assets/`
 6. **CI file cleanup**: Delete either `.github/` or `.gitlab-ci.yml` depending on your VCS provider
+7. **Don't call `console` directly**: use `LoggerService`, or the level configured in
+   `app-config.json` stops meaning anything. ESLint fails the build on a bare `console` call
