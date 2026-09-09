@@ -17,6 +17,7 @@ const testAppConfig: AppConfig = {
     secureRoutes: ['/api'],
   },
   resourceServer: { baseUrl: '/api' },
+  logging: { level: 'info' },
 };
 
 /**

@@ -2,6 +2,7 @@ import { AsyncPipe, JsonPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { MusicService } from '@core/music.service';
+import { LoggerService } from '@shared/logger.service';
 import { OidcSecurityService } from 'angular-auth-oidc-client';
 import { map } from 'rxjs/operators';
 
@@ -13,6 +14,7 @@ import { map } from 'rxjs/operators';
 export class Home {
   private readonly oidcSecurityService = inject(OidcSecurityService);
   private readonly musicService = inject(MusicService);
+  private readonly logger = inject(LoggerService);
 
   // Signals rather than a subscribe-into-a-field: they mark the view dirty on their own, so
   // this keeps working if the component ever moves to OnPush.
@@ -48,22 +50,32 @@ export class Home {
   }
 
   refreshSession(): void {
-    this.oidcSecurityService.forceRefreshSession().subscribe((result) => console.log(result));
+    this.oidcSecurityService
+      .forceRefreshSession()
+      .subscribe((result) => this.logger.debug('Session refreshed', result));
   }
 
   logout(): void {
-    this.oidcSecurityService.logoff().subscribe((result) => console.log(result));
+    this.oidcSecurityService
+      .logoff()
+      .subscribe((result) => this.logger.debug('Logged off', result));
   }
 
   logoffAndRevokeTokens(): void {
-    this.oidcSecurityService.logoffAndRevokeTokens().subscribe((result) => console.log(result));
+    this.oidcSecurityService
+      .logoffAndRevokeTokens()
+      .subscribe((result) => this.logger.debug('Logged off and revoked tokens', result));
   }
 
   revokeRefreshToken(): void {
-    this.oidcSecurityService.revokeRefreshToken().subscribe((result) => console.log(result));
+    this.oidcSecurityService
+      .revokeRefreshToken()
+      .subscribe((result) => this.logger.debug('Refresh token revoked', result));
   }
 
   revokeAccessToken(): void {
-    this.oidcSecurityService.revokeAccessToken().subscribe((result) => console.log(result));
+    this.oidcSecurityService
+      .revokeAccessToken()
+      .subscribe((result) => this.logger.debug('Access token revoked', result));
   }
 }
