@@ -1,4 +1,5 @@
 import { Injectable, Injector, inject } from '@angular/core';
+import type { LogLevel } from '@shared/logger.service';
 import { OidcSecurityService } from 'angular-auth-oidc-client';
 import { firstValueFrom } from 'rxjs';
 
@@ -23,6 +24,16 @@ export interface AppConfig {
      */
     baseUrl: string;
   };
+  /**
+   * Optional so a hand-edited config that predates it still loads; `LoggerService` falls back
+   * to `debug` in development and `warn` in production when it is absent.
+   *
+   * The type is imported for its type only — `LoggerService` reads this interface at runtime,
+   * and a value import in both directions would be a module cycle.
+   */
+  logging?: {
+    level?: LogLevel;
+  };
 }
 
 @Injectable({ providedIn: 'root' })
@@ -44,11 +55,14 @@ export class AppConfigService {
     this.config = await res.json();
   }
 
-  async initializeAuth(): Promise<void> {
+  /**
+   * Returns whether the session was restored rather than logging it: this service is what
+   * `LoggerService` reads its level from, so it deliberately depends on nothing that depends
+   * back on it. The app initializer in `app.config.ts` does the logging.
+   */
+  async initializeAuth(): Promise<boolean> {
     const oidcSecurityService = this.injector.get(OidcSecurityService);
-    console.log('Initializing authentication');
-
     const { isAuthenticated } = await firstValueFrom(oidcSecurityService.checkAuth());
-    console.log('Authentication initialized, authenticated:', isAuthenticated);
+    return isAuthenticated;
   }
 }

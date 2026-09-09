@@ -42,6 +42,9 @@ module.exports = tseslint.config(
     languageOptions: { globals: globals.browser },
     plugins: { import: importPlugin },
     rules: {
+      // Logging goes through LoggerService, which is level-controlled from app-config.json.
+      // The two places that genuinely cannot use it carry an inline disable explaining why.
+      'no-console': 'error',
       'import/no-unresolved': 'off', // TypeScript resolves the @core/@layout/... aliases
       'import/order': [
         'warn',
@@ -51,6 +54,13 @@ module.exports = tseslint.config(
         },
       ],
     },
+  },
+
+  // Specs are allowed to reach for the console: LoggerService's own spec asserts on what it
+  // writes there, which is the only way to prove a level is actually filtered out.
+  {
+    files: ['**/*.spec.ts'],
+    rules: { 'no-console': 'off' },
   },
 
   {
